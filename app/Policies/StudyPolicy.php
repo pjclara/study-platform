@@ -13,7 +13,7 @@ class StudyPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true; // Adjust logic as needed
     }
 
     /**
@@ -21,7 +21,7 @@ class StudyPolicy
      */
     public function view(User $user, Study $study): bool
     {
-        return false;
+        return true; // Adjust logic as needed
     }
 
     /**
@@ -29,7 +29,7 @@ class StudyPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return true; // Adjust logic as needed
     }
 
     /**
@@ -37,7 +37,7 @@ class StudyPolicy
      */
     public function update(User $user, Study $study): bool
     {
-        return false;
+        return true; // Adjust logic as needed
     }
 
     /**
@@ -45,7 +45,7 @@ class StudyPolicy
      */
     public function delete(User $user, Study $study): bool
     {
-        return false;
+        return true; // Adjust logic as needed
     }
 
     /**
@@ -53,7 +53,7 @@ class StudyPolicy
      */
     public function restore(User $user, Study $study): bool
     {
-        return false;
+        return true; // Adjust logic as needed
     }
 
     /**
@@ -61,6 +61,6 @@ class StudyPolicy
      */
     public function forceDelete(User $user, Study $study): bool
     {
-        return false;
+        return true; // Adjust logic as needed
     }
 }

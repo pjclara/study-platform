@@ -17,12 +17,10 @@ class ParticipantFactory extends Factory
     public function definition(): array
     {
         return [
-            'study_id' => \App\Models\Study::factory(),
+            'study_id' => \App\Models\Study::inRandomOrder()->first()->id,
             'code' => $this->faker->unique()->word,
             'imported_data' => null, // Assuming this is nullable
-            'created_by' => \App\Models\User::factory(),
-            'updated_by' => \App\Models\User::factory(),
-            'deleted_by' => null, // Assuming this is nullable
+            'created_by' => \App\Models\User::inRandomOrder()->first()->id,
         ];
     }
 }

@@ -19,6 +19,7 @@ class Study extends Model
         'study_type',
         'end_date',
         'ethical_approval',
+        'status',
         'created_by',
         'updated_by',
         'deleted_by',

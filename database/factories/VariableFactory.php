@@ -17,12 +17,10 @@ class VariableFactory extends Factory
     public function definition(): array
     {
         return [
-            'study_id' => \App\Models\Study::factory(),
+            'study_id' => \App\Models\Study::inRandomOrder()->first()->id,
             'name' => $this->faker->word,
             'type' => $this->faker->randomElement(['string', 'integer', 'float', 'boolean']),
-            'created_by' => \App\Models\User::factory(),
-            'updated_by' => null,
-            'deleted_by' => null, // Assuming this field is nullable          
+            'created_by' => \App\Models\User::inRandomOrder()->first()->id,
         ];
     }
 }

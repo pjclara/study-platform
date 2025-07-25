@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Study;
+use App\Models\Variable;
 use App\Http\Requests\StoreStudyRequest;
 use App\Http\Requests\UpdateStudyRequest;
+use Illuminate\Http\Request;
 
 class StudyController extends Controller
 {
@@ -13,7 +15,10 @@ class StudyController extends Controller
      */
     public function index()
     {
-        //
+        $studies = Study::select('id', 'name', 'start_date', 'end_date', 'status')->get();
+        return inertia('studies/index', [
+            'studies' => $studies
+        ]);
     }
 
     /**
@@ -21,7 +26,7 @@ class StudyController extends Controller
      */
     public function create()
     {
-        //
+        return inertia('studies/create');
     }
 
     /**
@@ -41,7 +46,11 @@ class StudyController extends Controller
      */
     public function show(Study $study)
     {
-        //
+        $study->load('variables');
+        return inertia('studies/show', [
+            'study' => $study,
+            'variables' => $study->variables,
+        ]);
     }
 
     /**
@@ -49,7 +58,9 @@ class StudyController extends Controller
      */
     public function edit(Study $study)
     {
-        //
+        return inertia('studies/edit', [
+            'study' => $study
+        ]);
     }
 
     /**
@@ -64,7 +75,7 @@ class StudyController extends Controller
             $study->users()->sync($request->input('users'));
         }
 
-        return response()->json($study, 200);
+        return redirect()->route('studies.index')->with('success', 'Study updated successfully.');
     }
 
     /**
@@ -74,6 +85,45 @@ class StudyController extends Controller
     {
         $study->delete();
 
-        return response()->json(null, 204);
+        return redirect()->route('studies.index')->with('success', 'Study deleted successfully.');
+    }
+
+    /**
+     * Store a newly created variable for the specified study.
+     */
+    public function storeVariable(Request $request, Study $study)
+    {
+        // created_by 
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => 'required|in:string,integer,float,boolean',
+        ]);
+        // add created_by 
+        $validated['created_by'] = auth()->id();
+        $variable = $study->variables()->create($validated);
+        return redirect()->back()->with('success', 'Variable added successfully.');
+    }
+
+    /**
+     * Update the specified variable for the study.
+     */
+    public function updateVariable(Request $request, Study $study, Variable $variable)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => 'required|in:string,integer,float,boolean',
+        ]);
+        $variable->update($validated);
+        return redirect()->back()->with('success', 'Variable updated successfully.');
+    }
+
+    /**
+     * Remove the specified variable from the study.
+     */
+    public function deleteVariable(Study $study, Variable $variable)
+    {
+        $variable->delete();
+        return redirect()->back()->with('success', 'Variable deleted successfully.');
     }
 }

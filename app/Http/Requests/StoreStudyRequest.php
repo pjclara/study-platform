@@ -11,7 +11,7 @@ class StoreStudyRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -28,7 +28,6 @@ class StoreStudyRequest extends FormRequest
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'status' => 'required|in:planned,ongoing,completed,cancelled',
             // Add other fields as necessary
-            'created_by' => 'required|exists:users,id',
             'updated_by' => 'nullable|exists:users,id',
             'deleted_by' => 'nullable|exists:users,id',
         ];

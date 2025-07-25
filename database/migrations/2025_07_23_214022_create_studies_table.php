@@ -19,6 +19,7 @@ return new class extends Migration
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->string('ethical_approval')->nullable();
+            $table->enum('status', ['active', 'inactive', 'archived'])->default('active');
             $table->foreignUuid('created_by')->constrained('users');
             $table->foreignUuid('updated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignUuid('deleted_by')->nullable()->constrained('users')->onDelete('set null');
