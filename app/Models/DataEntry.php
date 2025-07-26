@@ -12,8 +12,9 @@ class DataEntry extends Model
 {
     use HasFactory, SoftDeletes, HasUlids;
     protected $table = 'data_entries';
+
     protected $fillable = [
-        'participant_id',
+        'study_entry_id',
         'variable_id',
         'value',
         'filled_by',
@@ -27,9 +28,9 @@ class DataEntry extends Model
         'filled_at' => 'datetime',
     ];
 
-    public function participant()
+    public function studyEntry()
     {
-        return $this->belongsTo(Participant::class);
+        return $this->belongsTo(StudyEntry::class);
     }
 
     public function variable()

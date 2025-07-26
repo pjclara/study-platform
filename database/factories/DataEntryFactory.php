@@ -17,7 +17,7 @@ class DataEntryFactory extends Factory
     public function definition(): array
     {
         return [
-            'participant_id' => \App\Models\Participant::inRandomOrder()->first()->id,
+            'study_entry_id' => \App\Models\StudyEntry::inRandomOrder()->first()->id,
             'variable_id' => \App\Models\Variable::inRandomOrder()->first()->id,
             'value' => $this->faker->randomElement(['Yes', 'No', 'Maybe']),
             'filled_by' => \App\Models\User::inRandomOrder()->first()->id,

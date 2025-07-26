@@ -5,9 +5,9 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Variable>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\StudyEntry>
  */
-class VariableFactory extends Factory
+class StudyEntryFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -18,11 +18,7 @@ class VariableFactory extends Factory
     {
         return [
             'study_id' => \App\Models\Study::inRandomOrder()->first()->id,
-            'name' => $this->faker->word,
-            'type' => $this->faker->randomElement([
-                'text', 'number', 'date', 'boolean'
-            ]),
-            'created_by' => \App\Models\User::inRandomOrder()->first()->id,
+            'identifier' => $this->faker->unique()->word,
         ];
     }
 }

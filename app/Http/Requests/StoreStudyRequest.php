@@ -24,12 +24,11 @@ class StoreStudyRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'start_date' => 'required|date',
+            'start_date' => 'required|date|before_or_equal:today',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'status' => 'required|in:planned,ongoing,completed,cancelled',
-            // Add other fields as necessary
-            'updated_by' => 'nullable|exists:users,id',
-            'deleted_by' => 'nullable|exists:users,id',
+            'study_type' => 'nullable|string|max:255',
+            'ethical_approval' => 'nullable|boolean',
         ];
     }
 }

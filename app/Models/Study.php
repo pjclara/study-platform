@@ -36,11 +36,6 @@ class Study extends Model
         return $this->hasMany(Variable::class);
     }
 
-    public function participants()
-    {
-        return $this->hasMany(Participant::class);
-    }
-
     public function users()
     {
         return $this->belongsToMany(User::class)->withPivot('role');
@@ -49,5 +44,21 @@ class Study extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function dataEntries()
+    {
+        return $this->hasManyThrough(
+            DataEntry::class,
+            Variable::class,
+            'study_id', // Foreign key on Variable table...
+            'variable_id', // Foreign key on DataEntry table...
+            'id', // Local key on Study table...
+            'id' // Local key on Variable table...
+        );
+    }
+
+    public function studyEntries() {
+         return $this->hasMany(StudyEntry::class)->with('dataEntries');
     }
 }

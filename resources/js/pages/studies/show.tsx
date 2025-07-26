@@ -108,9 +108,9 @@ export default function StudyShow() {
                                 className="input input-bordered w-full"
                             >
                                 <option value="">Select type</option>
-                                <option value="string">String</option>
-                                <option value="integer">Integer</option>
-                                <option value="float">Float</option>
+                                <option value="text">Text</option>
+                                <option value="number">Number</option>
+                                <option value="date">Date</option>
                                 <option value="boolean">Boolean</option>
                             </select>
                             {errors.type && <div className="text-red-500 text-sm">{errors.type}</div>}
@@ -124,7 +124,6 @@ export default function StudyShow() {
                     <table className="min-w-full border bg-white mb-4">
                         <thead>
                             <tr>
-                                <th className="border-b px-4 py-2">ID</th>
                                 <th className="border-b px-4 py-2">Name</th>
                                 <th className="border-b px-4 py-2">Type</th>
                                 <th className="border-b px-4 py-2">Actions</th>
@@ -133,7 +132,6 @@ export default function StudyShow() {
                         <tbody>
                             {variables.map(variable => (
                                 <tr key={variable.id}>
-                                    <td className="border-b px-4 py-2">{variable.id}</td>
                                     <td className="border-b px-4 py-2">
                                         {editId === variable.id ? (
                                             <form onSubmit={e => handleEditSubmit(e, variable.id)} className="flex items-center gap-2">
@@ -159,9 +157,10 @@ export default function StudyShow() {
                                                     onChange={handleEditChange}
                                                     className="input input-bordered w-full"
                                                 >
-                                                    <option value="string">String</option>
-                                                    <option value="integer">Integer</option>
-                                                    <option value="float">Float</option>
+                                                    <option value="">Select type</option>
+                                                    <option value="text">Text</option>
+                                                    <option value="number">Number</option>
+                                                    <option value="date">Date</option>
                                                     <option value="boolean">Boolean</option>
                                                 </select>
                                                 {editErrors.type && <div className="text-red-500 text-sm">{editErrors.type}</div>}

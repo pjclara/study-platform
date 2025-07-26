@@ -35,7 +35,6 @@ export default function StudyIndex() {
                 <table className="min-w-full border bg-white">
                     <thead>
                         <tr>
-                            <th className="border-b px-4 py-2">ID</th>
                             <th className="border-b px-4 py-2">Name</th>
                             <th className="border-b px-4 py-2">Status</th>
                             <th className="border-b px-4 py-2">Actions</th>
@@ -45,7 +44,6 @@ export default function StudyIndex() {
                         {studies && studies.length > 0 ? (
                             studies.map((study) => (
                                 <tr key={study.id}>
-                                    <td className="border-b px-4 py-2">{study.id}</td>
                                     <td className="border-b px-4 py-2">{study.name}</td>
                                     <td className="border-b px-4 py-2">{study.status}</td>
                                     <td className="border-b px-4 py-2">
@@ -54,6 +52,9 @@ export default function StudyIndex() {
                                         </Link>
                                         <Link href={`/studies/${study.id}/edit`} className="text-yellow-600 hover:underline mr-2">
                                             Edit
+                                        </Link>
+                                        <Link href={`/studies/${study.id}/data-list`} className="text-green-600 hover:underline mr-2">
+                                            View Data
                                         </Link>
                                         <form
                                             onSubmit={(e) => {

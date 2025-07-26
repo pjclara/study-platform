@@ -22,6 +22,8 @@ class StudyFactory extends Factory
             'study_type' => $this->faker->randomElement(['clinical', 'observational', 'survey']),
             'start_date' => $this->faker->dateTimeBetween('-1 year', 'now'),
             'end_date' => $this->faker->dateTimeBetween('now', '+1 year'),
+            'ethical_approval' => $this->faker->boolean,
+            'status' => $this->faker->randomElement(['planned', 'ongoing', 'completed', 'cancelled']),
             'created_by' => User::inRandomOrder()->first()->id
         ];
     }

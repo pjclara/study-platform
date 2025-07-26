@@ -8,6 +8,7 @@ use App\Models\Participant;
 use App\Models\Variable;
 use App\Models\DataEnterie;
 use App\Models\DataEntry;
+use App\Models\StudyEntry;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -18,20 +19,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory(10)->create();
-        Study::factory(5)->create()->each(function ($study) {
+        User::factory()->create();
+        Study::factory(1)->create()->each(function ($study) {
             $study->users()->attach(User::inRandomOrder()->first(), ['role' => 'coordinator']);
         });
-        Participant::factory(20)->create()->each(function ($participant) {
-            $participant->study()->associate(Study::inRandomOrder()->first());
-            $participant->save();
+        StudyEntry::factory(1)->create()->each(function ($studyEntry) {
+            $studyEntry->study()->associate(Study::inRandomOrder()->first());
+            $studyEntry->save();
         });
-        Variable::factory(10)->create()->each(function ($variable) {
-            $variable->study()->associate(Study::inRandomOrder()->first());
-            $variable->save();
-        });
-
-        DataEntry::factory(50)->create();
+        Variable::factory(1)->create();
+        DataEntry::factory(1)->create();
 
         
     }
