@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignUuid('study_id')->constrained('studies')->onDelete('cascade');
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
             $table->string('role'); // exemplo: coordinator, viewer, editor
+            // active
+            $table->boolean('active')->default(true); // Indica se o usuário está ativo no estudo
             $table->timestamps();
         });
     }

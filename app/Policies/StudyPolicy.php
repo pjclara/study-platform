@@ -29,7 +29,7 @@ class StudyPolicy
      */
     public function create(User $user): bool
     {
-        return true; // Adjust logic as needed
+        return auth()->user()->can('create studies'); // Adjust logic as needed
     }
 
     /**
@@ -37,7 +37,7 @@ class StudyPolicy
      */
     public function update(User $user, Study $study): bool
     {
-        return true; // Adjust logic as needed
+        return auth()->user()->can('update studies'); // Adjust logic as needed
     }
 
     /**
@@ -45,7 +45,7 @@ class StudyPolicy
      */
     public function delete(User $user, Study $study): bool
     {
-        return true; // Adjust logic as needed
+        return auth()->user()->can('delete studies'); // Adjust logic as needed
     }
 
     /**
@@ -53,7 +53,7 @@ class StudyPolicy
      */
     public function restore(User $user, Study $study): bool
     {
-        return true; // Adjust logic as needed
+        return auth()->user()->can('restore studies'); // Adjust logic as needed
     }
 
     /**
@@ -61,6 +61,6 @@ class StudyPolicy
      */
     public function forceDelete(User $user, Study $study): bool
     {
-        return true; // Adjust logic as needed
+        return auth()->user()->can('force delete studies'); // Adjust logic as needed
     }
 }

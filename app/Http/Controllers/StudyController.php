@@ -8,16 +8,22 @@ use App\Http\Requests\StoreStudyRequest;
 use App\Http\Requests\UpdateStudyRequest;
 use App\Models\DataEntry;
 use App\Models\StudyEntry;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class StudyController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $studies = Study::select('id', 'name', 'start_date', 'end_date', 'status')->get();
+        $studies = Study::select('id', 'name', 'start_date', 'end_date', 'status')
+            ->whereHas('users', function ($query) {
+                $query->where('user_id', auth()->id());
+            })
+            ->get();
         return inertia('studies/index', [
             'studies' => $studies
         ]);
@@ -59,6 +65,14 @@ class StudyController extends Controller
         return inertia('studies/show', [
             'study' => $study,
             'variables' => $study->variables,
+            'users' => User::all(),
+            'studyUser' => $study->users->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'role' => $user->pivot->role,
+                ];
+            })->toArray(),
         ]);
     }
 
@@ -283,5 +297,32 @@ class StudyController extends Controller
             ]);
         }
         return redirect()->route('studies.data-list', $study->id)->with('success', 'Data entries added successfully.');
+    }
+
+    public function addUser(Request $request, Study $study)
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'role' => 'required|in:admin,coordinator,viewer',
+        ]);
+
+        $study->users()->attach($validated['user_id'], ['role' => $validated['role']]);
+
+        return back(); // Inertia lida bem com isso
+    }
+
+    public function updateUserRole(Request $request, Study $study, User $user)
+    {
+        $validated = $request->validate([
+            'role' => 'required|in:admin,coordinator,viewer',
+        ]);
+
+        $study->users()->updateExistingPivot($user->id, ['role' => $validated['role']]);
+        return back(); // Inertia lida bem com isso
+    }
+    public function removeUser(Study $study, User $user)
+    {
+        $study->users()->detach($user->id);
+        return back(); // Inertia lida bem com isso
     }
 }

@@ -8,15 +8,12 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
-    
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
-
     Route::resource('studies', StudyController::class);
-
-
     Route::post('studies/{study}/variables', [\App\Http\Controllers\StudyController::class, 'storeVariable'])->name('studies.variables.store');
     Route::put('studies/{study}/variables/{variable}', [\App\Http\Controllers\StudyController::class, 'updateVariable'])->name('studies.variables.update');
     Route::delete('studies/{study}/variables/{variable}', [\App\Http\Controllers\StudyController::class, 'deleteVariable'])->name('studies.variables.delete');
@@ -26,6 +23,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/studies/{study}/data-entry/{entry}/edit', [StudyController::class, 'editEntry'])->name('studies.data-entry.edit');
     Route::put('/studies/{study}/data-entry/{entry}', [StudyController::class, 'updateEntry'])->name('studies.data-entry.update');
     Route::delete('/studies/{study}/data-entry/{entry}', [StudyController::class, 'deleteEntry'])->name('studies.data-entry.delete');
+    Route::post('/studies/{study}/add-user', [StudyController::class, 'addUser'])->name('studies.addUser');
+    Route::put('/studies/{study}/edit-user/{user}', [StudyController::class, 'updateUserRole'])->name('studies.updateUserRole');
+    Route::delete('/studies/{study}/remove-user/{user}', [StudyController::class, 'removeUser'])->name('studies.removeUser');
 });
 
 require __DIR__ . '/settings.php';
