@@ -19,7 +19,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create();
+        User::create([
+            'name' => 'Admin User',
+            'email' => 'admin@admin.com',
+            'password' => bcrypt('password'),
+        ]);
+        /*
         Study::factory(1)->create()->each(function ($study) {
             $study->users()->attach(User::inRandomOrder()->first(), ['role' => 'coordinator']);
         });
@@ -29,6 +34,8 @@ class DatabaseSeeder extends Seeder
         });
         Variable::factory(1)->create();
         DataEntry::factory(1)->create();
+        Participant::factory(1)->create();
+        */
 
         
     }

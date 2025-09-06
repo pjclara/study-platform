@@ -26,8 +26,8 @@ class UpdateStudyRequest extends FormRequest
             'description' => 'nullable|string',
             'start_date' => 'required|date|before_or_equal:end_date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'status' => 'required|in:active,inactive,archived',
-            'study_type' => 'nullable|string|max:255',
+            'status' => 'required|in:planned,ongoing,completed,cancelled',
+            'study_type' => 'required|string|max:255',
             'ethical_approval' => 'nullable|boolean',
         ];
     }

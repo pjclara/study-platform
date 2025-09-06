@@ -1,6 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import React from 'react';
+import { HiOutlineArrowLeft, HiOutlineCheckCircle } from 'react-icons/hi';
 
 type Study = {
     id: number;
@@ -36,11 +37,14 @@ export default function StudyEdit() {
 
     return (
         <AppLayout>
-            <Head title="Edit Study" />
-            <h1 className="mb-4 text-2xl font-bold">Edit Study</h1>
-            <div className="bg-bg-gray-200 mt-5 max-w-2xl rounded-2xl p-6 shadow-lg">
-                <h2 className="mb-6 text-2xl font-semibold text-gray-800">Criar Estudo</h2>
-
+            <Head title="Editar Estudo" />
+            <div className="max-w-2xl mx-auto bg-white rounded-xl shadow p-6 mt-6">
+                <div className="flex items-center gap-2 mb-6">
+                    <Link href="/studies" className="text-gray-500 hover:text-gray-700 transition">
+                        <HiOutlineArrowLeft className="w-6 h-6" />
+                    </Link>
+                    <h1 className="text-2xl font-bold text-gray-900">Editar Estudo</h1>
+                </div>
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
                         <label className="mb-1 block font-medium text-gray-700">Nome</label>
@@ -73,7 +77,6 @@ export default function StudyEdit() {
                             />
                             {errors.start_date && <div className="mt-1 text-sm text-red-500">{errors.start_date}</div>}
                         </div>
-
                         <div>
                             <label className="mb-1 block font-medium text-gray-700">Data de Fim</label>
                             <input
@@ -93,9 +96,10 @@ export default function StudyEdit() {
                             className="select select-bordered w-full"
                         >
                             <option value="">Selecione o Status</option>
-                            <option value="active">Ativo</option>
-                            <option value="inactive">Inativo</option>
-                            <option value="archived">Archived</option>
+                            <option value="planned">Planejado</option>
+                            <option value="ongoing">Em andamento</option>
+                            <option value="completed">Concluído</option>
+                            <option value="cancelled">Cancelado</option>
                         </select>
                         {errors.status && <div className="mt-1 text-sm text-red-500">{errors.status}</div>}
                     </div>
@@ -123,15 +127,12 @@ export default function StudyEdit() {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="rounded bg-green-600 px-4 py-2 font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+                            className="inline-flex items-center gap-2 rounded bg-green-600 px-4 py-2 font-semibold text-white hover:bg-green-700 disabled:opacity-50"
                         >
-                            Salvar
+                            <HiOutlineCheckCircle className="w-5 h-5" /> Salvar
                         </button>
-                        <Link
-                            href="/studies"
-                            className="rounded bg-gray-600 px-4 py-2 font-semibold text-white hover:bg-gray-700 disabled:opacity-50"
-                        >
-                            Cancelar
+                        <Link href="/studies" className="inline-flex items-center gap-2 rounded bg-gray-600 px-4 py-2 font-semibold text-white hover:bg-gray-700 disabled:opacity-50">
+                            <HiOutlineArrowLeft className="w-5 h-5" /> Cancelar
                         </Link>
                     </div>
                 </form>

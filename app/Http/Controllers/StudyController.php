@@ -19,7 +19,7 @@ class StudyController extends Controller
      */
     public function index()
     {
-        $studies = Study::select('id', 'name', 'start_date', 'end_date', 'status')
+        $studies = Study::select('id', 'name', 'start_date', 'end_date', 'status', 'study_type', 'description', 'ethical_approval')
             ->whereHas('users', function ($query) {
                 $query->where('user_id', auth()->id());
             })
