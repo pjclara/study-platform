@@ -1,8 +1,9 @@
+
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
-
+import toast from 'react-hot-toast';
 import DeleteUser from '@/components/delete-user';
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
@@ -34,9 +35,10 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-
         patch(route('profile.update'), {
             preserveScroll: true,
+            onSuccess: () => toast.success('Perfil atualizado com sucesso!'),
+            onError: () => toast.error('Erro ao atualizar perfil.'),
         });
     };
 

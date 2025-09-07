@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
+import toast from 'react-hot-toast';
 import {
   Dialog,
   DialogContent,
@@ -46,16 +47,24 @@ export default function UserModal({ isOpen, onClose, onSuccess, studyId, user, u
     if (isEdit && user) {
       put(`/studies/${studyId}/edit-user/${user.id}`, {
         onSuccess: () => {
+          toast.success('Usuário atualizado com sucesso!');
           onSuccess && onSuccess();
           onClose();
         },
+        onError: () => {
+          toast.error('Erro ao atualizar usuário.');
+        }
       });
     } else {
       post(`/studies/${studyId}/add-user`, {
         onSuccess: () => {
+          toast.success('Usuário adicionado com sucesso!');
           onSuccess && onSuccess();
           onClose();
         },
+        onError: () => {
+          toast.error('Erro ao adicionar usuário.');
+        }
       });
     }
   }

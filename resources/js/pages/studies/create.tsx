@@ -1,7 +1,9 @@
+
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import React from 'react';
 import { HiOutlineArrowLeft, HiOutlineCheckCircle } from 'react-icons/hi';
+import toast from 'react-hot-toast';
 
 export default function StudyCreate() {
     const { data, setData, post, processing, errors } = useForm({
@@ -17,6 +19,7 @@ export default function StudyCreate() {
         e.preventDefault();
         post('/studies', {
             onSuccess: () => {
+                toast.success('Estudo criado com sucesso!');
                 setData({
                     name: '',
                     description: '',
@@ -26,6 +29,9 @@ export default function StudyCreate() {
                     study_type: '',
                 });
             },
+            onError: () => {
+                toast.error('Erro ao criar estudo.');
+            }
         });
     }
 

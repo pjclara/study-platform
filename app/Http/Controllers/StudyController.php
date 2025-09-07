@@ -296,9 +296,9 @@ class StudyController extends Controller
     {
         $entry = StudyEntry::with(['dataEntries'])->findOrFail($entryId);
 
-        $values = $request->except(['_method']);
-        foreach ($values as $variableId => $value) {
 
+        $values = $request->input('values', []);
+        foreach ($values as $variableId => $value) {
             DataEntry::updateOrCreate(
                 [
                     'study_entry_id' => $entry->id,

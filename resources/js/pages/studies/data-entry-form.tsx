@@ -1,6 +1,8 @@
+
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import React from 'react';
+import toast from 'react-hot-toast';
 
 type Variable = {
     id: number;
@@ -27,7 +29,11 @@ export default function DataEntryForm() {
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         post(`/studies/${studyId}/data-entry`, {
-            onSuccess: () => reset(),
+            onSuccess: () => {
+                toast.success('Entrada criada com sucesso!');
+                reset();
+            },
+            onError: () => toast.error('Erro ao criar entrada.'),
         });
     }
     return (

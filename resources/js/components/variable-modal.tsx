@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
+import toast from 'react-hot-toast';
 import {
   Dialog,
   DialogContent,
@@ -76,7 +77,7 @@ export const VariableModal: React.FC<VariableModalProps> = ({ isOpen, onClose, o
     e.preventDefault();
     const validTypes = ['text', 'number', 'date', 'boolean', 'select'];
     if (!validTypes.includes(data.type)) {
-      alert('Selecione um tipo válido para a variável.');
+      toast.error('Selecione um tipo válido para a variável.');
       return;
     }
     let optionsToSend: string[] = [];
@@ -90,16 +91,24 @@ export const VariableModal: React.FC<VariableModalProps> = ({ isOpen, onClose, o
       if (isEdit && variable) {
         put(`/studies/${studyId}/variables/${variable.id}`, {
           onSuccess: () => {
+            toast.success('Variável atualizada com sucesso!');
             onSuccess && onSuccess();
             onClose();
           },
+          onError: () => {
+            toast.error('Erro ao atualizar variável.');
+          }
         });
       } else {
         post(`/studies/${studyId}/variables`, {
           onSuccess: () => {
+            toast.success('Variável criada com sucesso!');
             onSuccess && onSuccess();
             onClose();
           },
+          onError: () => {
+            toast.error('Erro ao criar variável.');
+          }
         });
       }
     }, 0);

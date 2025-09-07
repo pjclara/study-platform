@@ -1,7 +1,11 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, usePage } from '@inertiajs/react';
+import DataEntryModal from '@/components/data-entry-modal';
 
 import { router } from '@inertiajs/core';
+import toast from 'react-hot-toast';
+import React, { useState } from 'react';
+
 // Tipos
 
 type VariableOptions = {
@@ -33,11 +37,16 @@ type StudyDataListProps = {
 const handleDelete = (e: React.FormEvent, id: number, studyId:number) => {
     e.preventDefault();
     if (confirm('Tem certeza que deseja excluir esta entrada?')) {
-        router.delete(`/studies/${studyId}/data-entry/${id}`);
+        router.delete(`/studies/${studyId}/data-entry/${id}`, {
+            onSuccess: () => toast.success('Entrada excluída com sucesso!'),
+            onError: () => toast.error('Erro ao excluir entrada.'),
+        });
     }
 };
 
 export default function StudyDataList() {
+    const [showEntryModal, setShowEntryModal] = React.useState(false);
+    const [editEntry, setEditEntry] = React.useState<any | null>(null);
     const { studyId, studyEntries, variables } = usePage<StudyDataListProps>().props;
 
     const safeEntries = Array.isArray(studyEntries) ? studyEntries : [];
@@ -52,13 +61,27 @@ console.log(variables);
 
                 {/* Botão para adicionar nova entrada */}
                 <div className="mb-4">
-                    <Link
-                        href={`/studies/${studyId}/data-entry`}
+                    <button
+                        onClick={() => { setEditEntry(null); setShowEntryModal(true); }}
                         className="inline-block rounded bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
                     >
                         + Adicionar Entrada
-                    </Link>
+                    </button>
                 </div>
+
+                {/* Modal de criar/editar entrada */}
+                <DataEntryModal
+                    isOpen={showEntryModal}
+                    onClose={() => { setShowEntryModal(false); setEditEntry(null); }}
+                    studyId={studyId}
+                    variables={safeVariables.map(v => ({
+                        ...v,
+                        type: v.type || 'text',
+                        options: v.options ? v.options.map(opt => typeof opt === 'string' ? opt : opt.value) : undefined
+                    }))}
+                    initialValues={editEntry ? { ...editEntry.values, id: editEntry.id } : {}}
+                    onSuccess={() => { setShowEntryModal(false); setEditEntry(null); }}
+                />
 
                 {/* Tabela */}
                 <div className="overflow-x-auto">
@@ -85,9 +108,12 @@ console.log(variables);
                                         ))}
                                         <td className="border px-4 py-2">{new Date(entry.created_at).toLocaleDateString()}</td>
                                         <td className="border px-4 py-2">
-                                            <Link href={`/studies/${studyId}/data-entry/${entry.id}/edit`} className="text-blue-600 hover:underline">
+                                            <button
+                                                onClick={() => { setEditEntry(entry); setShowEntryModal(true); }}
+                                                className="text-blue-600 hover:underline mr-2"
+                                            >
                                                 Editar
-                                            </Link>
+                                            </button>
                                             <form onSubmit={(e) => handleDelete(e, entry.id, studyId)} className="ml-2 inline">
                                                 <button type="submit" className="text-red-600 hover:underline">
                                                     Excluir

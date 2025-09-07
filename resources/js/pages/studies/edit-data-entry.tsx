@@ -1,5 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import toast from 'react-hot-toast';
 
 // Tipos
 interface Variable {
@@ -29,7 +30,10 @@ export default function EditEntry() {
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        put(`/studies/${studyId}/data-entry/${entry.id}`);
+        put(`/studies/${studyId}/data-entry/${entry.id}`, {
+            onSuccess: () => toast.success('Entrada atualizada com sucesso!'),
+            onError: () => toast.error('Erro ao atualizar entrada.'),
+        });
     }
 
     console.log(variables);
