@@ -165,8 +165,9 @@ class StudyController extends Controller
 
         // Todas as variáveis do estudo
         $variables = Variable::where('study_id', $studyId)
-            ->select('id', 'name', 'type','options')
-            ->get();
+            ->select('id', 'name', 'type', 'options')
+            ->get()
+            ->sortBy('order_index'); // Ordena pelas variáveis pelo order_index
 
 
         // Todas as entradas de dados do estudo
@@ -329,5 +330,19 @@ class StudyController extends Controller
     {
         $study->users()->detach($user->id);
         return back(); // Inertia lida bem com isso
+    }
+
+    /**
+     * Atualiza a ordem das variáveis do estudo.
+     */
+    public function orderVariables(Request $request, Study $study)
+    {
+        $order = $request->input('order', []);
+        foreach ($order as $item) {
+            if (isset($item['id'], $item['order_index'])) {
+                Variable::where('id', $item['id'])->where('study_id', $study->id)->update(['order_index' => $item['order_index']]);
+            }
+        }
+        return response()->json(['success' => true]);
     }
 }

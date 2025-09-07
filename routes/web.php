@@ -15,6 +15,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
     Route::resource('studies', StudyController::class);
     Route::post('studies/{study}/variables', [\App\Http\Controllers\StudyController::class, 'storeVariable'])->name('studies.variables.store');
+    Route::post('studies/{study}/variables/order', [\App\Http\Controllers\StudyController::class, 'orderVariables'])->name('studies.variables.order');
     Route::put('studies/{study}/variables/{variable}', [\App\Http\Controllers\StudyController::class, 'updateVariable'])->name('studies.variables.update');
     Route::delete('studies/{study}/variables/{variable}', [\App\Http\Controllers\StudyController::class, 'deleteVariable'])->name('studies.variables.delete');
     Route::get('studies/{study}/data-list', [\App\Http\Controllers\StudyController::class, 'dataList'])->name('studies.data-list');

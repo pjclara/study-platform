@@ -2,6 +2,10 @@ import AppLayout from '@/layouts/app-layout';
 import { router } from '@inertiajs/core';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import React, { useState } from 'react';
+import { DndContext, closestCenter, useSensor, useSensors, PointerSensor, KeyboardSensor, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import axios from 'axios';
 import VariableModal from '@/components/variable-modal';
 import UserModal from '@/components/user-modal';
 
@@ -14,6 +18,7 @@ type Variavel = {
     id: number;
     name: string;
     type: string;
+    order_index?: number;
 };
 
 type Usuario = {
@@ -35,7 +40,42 @@ type PageProps = {
 };
 
 export default function EstudoDetalhes() {
-    const { study, variables, users = [], studyUser = [] } = usePage<PageProps>().props;
+    const { study, variables: initialVariables, users = [], studyUser = [] } = usePage<PageProps>().props;
+    const [variables, setVariables] = useState<Variavel[]>([...initialVariables].sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)));
+    // Drag and drop
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor)
+    );
+
+    function handleDragEnd(event: DragEndEvent) {
+        const { active, over } = event;
+        if (active.id !== over?.id) {
+            const oldIndex = variables.findIndex(v => v.id === active.id);
+            const newIndex = variables.findIndex(v => v.id === over?.id);
+            const newVars = arrayMove(variables, oldIndex, newIndex).map((v, idx) => ({ ...v, order_index: idx }));
+            setVariables(newVars);
+            // Salvar ordem no backend usando axios (CSRF incluso automaticamente)
+            axios.post(`/studies/${study.id}/variables/order`, {
+                order: newVars.map(v => ({ id: v.id, order_index: v.order_index }))
+            });
+        }
+    }
+
+    function SortableItem({ variable, children }: { variable: Variavel, children: React.ReactNode }) {
+        const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: variable.id });
+        return (
+            <tr
+                ref={setNodeRef}
+                style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
+                {...attributes}
+                {...listeners}
+                className="cursor-move"
+            >
+                {children}
+            </tr>
+        );
+    }
 
     const [localOptions, setLocalOptions] = useState<string[]>([]);
     const { data, setData, post, processing, errors, reset } = useForm<{
@@ -204,31 +244,35 @@ export default function EstudoDetalhes() {
             />
 
             {variables.length > 0 ? (
-                <table className="mb-4 min-w-full border bg-white">
-                    <thead>
-                        <tr>
-                            <th className="border-b px-4 py-2">Nome</th>
-                            <th className="border-b px-4 py-2">Tipo</th>
-                            <th className="border-b px-4 py-2">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {variables.map((variavel) => (
-                            <tr key={variavel.id}>
-                                <td className="border-b px-4 py-2">{variavel.name}</td>
-                                <td className="border-b px-4 py-2">{variavel.type}</td>
-                                <td className="border-b px-4 py-2">
-                                    <button onClick={() => handleEdit(variavel)} className="px-3 py-1.5 rounded text-white bg-blue-600 hover:bg-blue-700 transition mr-2 text-xs font-semibold shadow">
-                                        Editar
-                                    </button>
-                                    <button onClick={() => handleDelete(variavel.id)} className="px-3 py-1.5 rounded text-white bg-red-600 hover:bg-red-700 transition text-xs font-semibold shadow">
-                                        Excluir
-                                    </button>
-                                </td>
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <table className="mb-4 min-w-full border bg-white">
+                        <thead>
+                            <tr>
+                                <th className="border-b px-4 py-2">Nome</th>
+                                <th className="border-b px-4 py-2">Tipo</th>
+                                <th className="border-b px-4 py-2">Ações</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <SortableContext items={variables.map(v => v.id)} strategy={verticalListSortingStrategy}>
+                            <tbody>
+                                {variables.map((variavel) => (
+                                    <SortableItem key={variavel.id} variable={variavel}>
+                                        <td className="border-b px-4 py-2">{variavel.name}</td>
+                                        <td className="border-b px-4 py-2">{variavel.type}</td>
+                                        <td className="border-b px-4 py-2">
+                                            <button onClick={() => handleEdit(variavel)} className="px-3 py-1.5 rounded text-white bg-blue-600 hover:bg-blue-700 transition mr-2 text-xs font-semibold shadow">
+                                                Editar
+                                            </button>
+                                            <button onClick={() => handleDelete(variavel.id)} className="px-3 py-1.5 rounded text-white bg-red-600 hover:bg-red-700 transition text-xs font-semibold shadow">
+                                                Excluir
+                                            </button>
+                                        </td>
+                                    </SortableItem>
+                                ))}
+                            </tbody>
+                        </SortableContext>
+                    </table>
+                </DndContext>
             ) : (
                 <div>Nenhuma variável cadastrada.</div>
             )}

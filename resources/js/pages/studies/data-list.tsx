@@ -8,6 +8,7 @@ type Variable = {
     name: string;
     type?: string;
     options?: string[];
+    order_index?: number;
 };
 
 type StudyEntry = {
@@ -34,7 +35,7 @@ export default function StudyDataList() {
     const { studyId, studyEntries, variables } = usePage<StudyDataListProps>().props;
 
     const safeEntries = Array.isArray(studyEntries) ? studyEntries : [];
-    const safeVariables = Array.isArray(variables) ? variables : [];
+    const safeVariables = Array.isArray(variables) ? [...variables].sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)) : [];
 console.log(variables);
 
     return (
