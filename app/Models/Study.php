@@ -33,7 +33,7 @@ class Study extends Model
 
     public function variables()
     {
-        return $this->hasMany(Variable::class);
+        return $this->hasMany(Variable::class)->with('options')->orderBy('order_index');
     }
 
     public function users()

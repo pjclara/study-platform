@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Study;
 use App\Models\Variable;
+use App\Models\VariableOption;
 use App\Http\Requests\StoreStudyRequest;
 use App\Http\Requests\UpdateStudyRequest;
 use App\Models\DataEntry;
 use App\Models\StudyEntry;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class StudyController extends Controller
 {
@@ -21,7 +23,7 @@ class StudyController extends Controller
     {
         $studies = Study::select('id', 'name', 'start_date', 'end_date', 'status', 'study_type', 'description', 'ethical_approval')
             ->whereHas('users', function ($query) {
-                $query->where('user_id', auth()->id());
+                $query->where('user_id', Auth::id());
             })
             ->get();
         return inertia('studies/index', [
@@ -44,10 +46,10 @@ class StudyController extends Controller
     {
         // Add created_by and updated_by fields
         $validatedData = $request->validated();
-        $validatedData['created_by'] = auth()->id();
+        $validatedData['created_by'] = Auth::id();
         $study = Study::create($validatedData);
 
-        $study->users()->attach(auth()->id(), ['role' => 'coordinator']);
+        $study->users()->attach(Auth::id(), ['role' => 'coordinator']);
 
 
         $studies = Study::select('id', 'name', 'start_date', 'end_date', 'status')->get();
@@ -61,6 +63,15 @@ class StudyController extends Controller
      */
     public function show(Study $study)
     {
+        // se for para devolver json
+
+        if (request()->wantsJson()) {
+            return response()->json([
+                'study' => $study,
+                'variables' => $study->variables,
+            ]);
+        }
+
         $study->load('variables');
         return inertia('studies/show', [
             'study' => $study,
@@ -94,8 +105,8 @@ class StudyController extends Controller
         $study->update($request->validated());
 
         // Update the pivot table if necessary
-        if ($request->has('users')) {
-            $study->users()->sync($request->input('users'));
+        if (request()->has('users')) {
+            $study->users()->sync(request()->input('users'));
         }
 
         return redirect()->route('studies.index')->with('success', 'Study updated successfully.');
@@ -116,15 +127,24 @@ class StudyController extends Controller
      */
     public function storeVariable(Request $request, Study $study)
     {
-        // created_by 
-
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|in:text,number,date,boolean,select',
+            'options' => 'nullable|array',
+            'options.*' => 'string',
         ]);
-        // add created_by 
-        $validated['created_by'] = auth()->id();
+        $validated['created_by'] = Auth::id();
+        $options = $validated['options'] ?? [];
+        unset($validated['options']);
         $variable = $study->variables()->create($validated);
+        if ($variable->type === 'select' && !empty($options)) {
+            foreach ($options as $idx => $opt) {
+                $variable->options()->create([
+                    'value' => $opt,
+                    'order_index' => $idx,
+                ]);
+            }
+        }
         return redirect()->back()->with('success', 'Variable added successfully.');
     }
 
@@ -139,10 +159,24 @@ class StudyController extends Controller
             'unit' => 'nullable|string|max:50',
             'group' => 'nullable|string|max:50',
             'order_index' => 'nullable|integer',
-            'required' => 'boolean', // Assuming this is a boolean field indicating if the variable
-            'options' => 'nullable|array', // opções para o tipo select
+            'required' => 'boolean',
+            'options' => 'nullable|array',
+            'options.*' => 'string',
         ]);
+        $options = $validated['options'] ?? [];
+        unset($validated['options']);
         $variable->update($validated);
+        if ($variable->type === 'select') {
+            // Remove opções antigas
+            $variable->options()->delete();
+            // Adiciona novas opções
+            foreach ($options as $idx => $opt) {
+                $variable->options()->create([
+                    'value' => $opt,
+                    'order_index' => $idx,
+                ]);
+            }
+        }
         return redirect()->back()->with('success', 'Variable updated successfully.');
     }
 
@@ -165,9 +199,12 @@ class StudyController extends Controller
 
         // Todas as variáveis do estudo
         $variables = Variable::where('study_id', $studyId)
-            ->select('id', 'name', 'type', 'options')
+            ->with(['options' => function ($q) {
+                $q->orderBy('order_index');
+            }])
+            ->select('id', 'name', 'type', 'order_index')
             ->get()
-            ->sortBy('order_index'); // Ordena pelas variáveis pelo order_index
+            ->sortBy('order_index');
 
 
         // Todas as entradas de dados do estudo
@@ -196,7 +233,15 @@ class StudyController extends Controller
 
         return inertia('studies/data-list', [
             'studyId' => $studyId,
-            'variables' => $variables,
+            'variables' => $variables->map(function ($v) {
+                return [
+                    'id' => $v->id,
+                    'name' => $v->name,
+                    'type' => $v->type,
+                    'order_index' => $v->order_index,
+                    'options' => ($v->type === 'select' && is_object($v->options)) ? $v->options->pluck('value')->toArray() : [],
+                ];
+            })->values(),
             'studyEntries' => $entries,
         ]);
     }
@@ -235,7 +280,15 @@ class StudyController extends Controller
                 'values' => $values,
                 'created_at' => $studyEntry->created_at,
             ],
-            'variables' => $study->variables->map(fn($v) => ['id' => $v->id, 'name' => $v->name, 'type' => $v->type, 'options' => $v->options]),
+            'variables' => $study->variables->map(function ($v) {
+                return [
+                    'id' => $v->id,
+                    'name' => $v->name,
+                    'type' => $v->type,
+                    'order_index' => $v->order_index,
+                    'options' => ($v->type === 'select' && is_object($v->options)) ? $v->options->pluck('value')->toArray() : [],
+                ];
+            }),
         ]);
     }
 
@@ -253,9 +306,9 @@ class StudyController extends Controller
                 ],
                 [
                     'value' => $value,
-                    'filled_by' => auth()->id(),
+                    'filled_by' => Auth::id(),
                     'filled_at' => now(),
-                    'created_by' => auth()->id(),
+                    'created_by' => Auth::id(),
                 ]
             );
         }
@@ -268,10 +321,20 @@ class StudyController extends Controller
     public function dataEntryForm(Study $study)
     {
 
-        $variables = $study->variables()->select('id', 'name', 'type', 'options')->get();
+        $variables = $study->variables()->with(['options' => function ($q) {
+            $q->orderBy('order_index');
+        }])->select('id', 'name', 'type', 'order_index')->get();
         return inertia('studies/data-entry-form', [
             'studyId' => $study->id,
-            'variables' => $variables,
+            'variables' => $variables->map(function ($v) {
+                return [
+                    'id' => $v->id,
+                    'name' => $v->name,
+                    'type' => $v->type,
+                    'order_index' => $v->order_index,
+                    'options' => ($v->type === 'select' && is_object($v->options)) ? $v->options->pluck('value')->toArray() : [],
+                ];
+            }),
         ]);
     }
 
@@ -289,7 +352,7 @@ class StudyController extends Controller
             'values' => 'required|array',
             'values.*' => 'required|string',
         ]);
-        $filledBy = auth()->id();
+        $filledBy = Auth::id();
         $filledAt = now();
         foreach ($validated['values'] as $variableId => $value) {
             $study->dataEntries()->create([
@@ -298,7 +361,7 @@ class StudyController extends Controller
                 'value' => $value,
                 'filled_by' => $filledBy,
                 'filled_at' => $filledAt,
-                'created_by' => auth()->id()
+                'created_by' => Auth::id()
 
             ]);
         }
@@ -344,5 +407,25 @@ class StudyController extends Controller
             }
         }
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Show the form for editing a variable.
+     */
+    public function editVariable(Study $study, Variable $variable)
+    {
+        $variable->load(['options' => function ($q) {
+            $q->orderBy('order_index');
+        }]);
+        return inertia('studies/edit-variable', [
+            'studyId' => $study->id,
+            'variable' => [
+                'id' => $variable->id,
+                'name' => $variable->name,
+                'type' => $variable->type,
+                'order_index' => $variable->order_index,
+                'options' => ($variable->type === 'select' && is_object($variable->options)) ? $variable->options->pluck('value')->toArray() : [],
+            ],
+        ]);
     }
 }

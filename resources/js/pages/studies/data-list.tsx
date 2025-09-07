@@ -3,11 +3,17 @@ import { Head, Link, usePage } from '@inertiajs/react';
 
 import { router } from '@inertiajs/core';
 // Tipos
+
+type VariableOptions = {
+    id: number;
+    value: string;
+};
+
 type Variable = {
     id: number;
     name: string;
     type?: string;
-    options?: string[];
+    options?: VariableOptions[];
     order_index?: number;
 };
 
@@ -62,11 +68,6 @@ console.log(variables);
                                 {safeVariables.map((v) => (
                                     <th key={v.id} className="border px-4 py-2 text-left">
                                         {v.name}
-                                        {v.type === 'select' && v.options && v.options.length > 0 && (
-                                            <div className="text-xs text-gray-300 font-normal mt-1">
-                                                Opções: {v.options.join(', ')}
-                                            </div>
-                                        )}
                                     </th>
                                 ))}
                                 <th className="border px-4 py-2 text-left">Inserido em</th>
@@ -105,6 +106,29 @@ console.log(variables);
                         </tbody>
                     </table>
                 </div>
+
+                {/* Tabela de opções das variáveis select */}
+                {safeVariables.some(v => v.type === 'select' && v.options && v.options.length > 0) && (
+                    <div className="mt-8">
+                        <h2 className="text-lg font-semibold mb-2">Opções das Variáveis (Select)</h2>
+                        <table className="min-w-fit border text-sm bg-white">
+                            <thead className="bg-gray-200">
+                                <tr>
+                                    <th className="border px-4 py-2">Variável</th>
+                                    <th className="border px-4 py-2">Opções</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {safeVariables.filter(v => v.type === 'select' && v.options && v.options.length > 0).map(v => (
+                                    <tr key={v.id}>
+                                        <td className="border px-4 py-2 font-medium">{v.name}</td>
+                                        <td className="border px-4 py-2">{v.options?.join(', ')}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
 
                 {/* Botão de voltar */}
                 <div className="float-end mt-6 flex">

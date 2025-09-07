@@ -6,8 +6,8 @@ import { DndContext, closestCenter, useSensor, useSensors, PointerSensor, Keyboa
 import { arrayMove, SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import axios from 'axios';
-import VariableModal from '@/components/variable-modal';
 import UserModal from '@/components/user-modal';
+import { VariableModal } from '@/components/variable-modal';
 
 type Estudo = {
     id: number;
@@ -42,6 +42,15 @@ type PageProps = {
 export default function EstudoDetalhes() {
     const { study, variables: initialVariables, users = [], studyUser = [] } = usePage<PageProps>().props;
     const [variables, setVariables] = useState<Variavel[]>([...initialVariables].sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)));
+
+    // Função para recarregar variáveis do backend
+    async function reloadVariables() {
+        const { data } = await axios.get(`/studies/${study.id}`);
+        console.log(data);
+        if (data && data.variables) {
+            setVariables([...data.variables].sort((a: Variavel, b: Variavel) => (a.order_index ?? 0) - (b.order_index ?? 0)));
+        }
+    }
     // Drag and drop
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -69,9 +78,22 @@ export default function EstudoDetalhes() {
                 ref={setNodeRef}
                 style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
                 {...attributes}
-                {...listeners}
-                className="cursor-move"
             >
+                {/* Ícone de drag, só ele recebe os listeners */}
+                <td className="border-b px-2 py-2 w-8 text-gray-400">
+                    <button
+                        type="button"
+                        {...listeners}
+                        tabIndex={-1}
+                        className="cursor-grab hover:text-gray-700 focus:outline-none"
+                        aria-label="Arrastar para ordenar"
+                        style={{ background: 'none', border: 'none', padding: 0 }}
+                    >
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M7 4a1 1 0 112 0 1 1 0 01-2 0zm4 0a1 1 0 112 0 1 1 0 01-2 0zm-4 6a1 1 0 112 0 1 1 0 01-2 0zm4 0a1 1 0 112 0 1 1 0 01-2 0zm-4 6a1 1 0 112 0 1 1 0 01-2 0zm4 0a1 1 0 112 0 1 1 0 01-2 0z" />
+                        </svg>
+                    </button>
+                </td>
                 {children}
             </tr>
         );
@@ -125,6 +147,8 @@ export default function EstudoDetalhes() {
             },
         });
     }
+
+    console.log(variables);
 
     // Editar variável
     function handleEdit(variable: Variavel) {
@@ -238,7 +262,11 @@ export default function EstudoDetalhes() {
             <VariableModal
                 isOpen={showVariableModal}
                 onClose={() => { setShowVariableModal(false); setEditVariable(null); }}
-                onSuccess={() => {}}
+                onSuccess={() => {
+                    setShowVariableModal(false);
+                    setEditVariable(null);
+                    reloadVariables();
+                }}
                 studyId={study.id}
                 variable={editVariable || undefined}
             />
@@ -248,6 +276,7 @@ export default function EstudoDetalhes() {
                     <table className="mb-4 min-w-full border bg-white">
                         <thead>
                             <tr>
+                                <th className="border-b px-2 py-2 w-8"></th>
                                 <th className="border-b px-4 py-2">Nome</th>
                                 <th className="border-b px-4 py-2">Tipo</th>
                                 <th className="border-b px-4 py-2">Ações</th>

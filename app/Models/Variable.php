@@ -22,17 +22,20 @@ class Variable extends Model
         'created_by',
         'updated_by',
         'deleted_by',
-        'required', // Assuming this is a boolean field indicating if the variable is required
-        'options', // opções para o tipo select
+        'required',
     ];
 
     protected $casts = [
         'required' => 'boolean',
-        'options' => 'array',
     ];
 
     public function study()
     {
         return $this->belongsTo(Study::class);
+    }
+
+    public function options()
+    {
+        return $this->hasMany(VariableOption::class);
     }
 }

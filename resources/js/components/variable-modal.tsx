@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
 import {
@@ -10,34 +11,59 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 
+
+// Types
+type VariableOption = { id: number; value: string };
+type Variable = {
+  id: number;
+  name: string;
+  type: string;
+  options?: string[] | VariableOption[];
+};
+
+
+
+
 interface VariableModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
   studyId: number;
-  variable?: {
-    id: number;
-    name: string;
-    type: string;
-    options?: string[];
-  };
+  variable?: Variable;
 }
 
-export default function VariableModal({ isOpen, onClose, onSuccess, studyId, variable }: VariableModalProps) {
+export const VariableModal: React.FC<VariableModalProps> = ({ isOpen, onClose, onSuccess, studyId, variable }) => {
+
+
   const isEdit = !!variable;
-  const [localOptions, setLocalOptions] = useState<string[]>(variable?.options && variable.options.length > 0 ? variable.options : ['']);
+
+  // Always convert options to string[]
+  function extractOptions(opts: string[] | VariableOption[] | undefined): string[] {
+    if (Array.isArray(opts)) {
+      if (opts.length > 0 && typeof opts[0] === 'object' && opts[0] !== null) {
+        return (opts as VariableOption[]).map((o) => o.value ?? '');
+      } else {
+        return opts as string[];
+      }
+    }
+    return [''];
+  }
+
+  const initialOptions = extractOptions(variable?.options);
+  const [localOptions, setLocalOptions] = useState<string[]>(initialOptions.length > 0 ? initialOptions : ['']);
   const { data, setData, post, put, processing, errors, reset } = useForm({
     name: variable?.name || '',
     type: variable?.type || '',
-    options: variable?.options || [],
+    options: initialOptions,
   });
 
   useEffect(() => {
     if (isEdit) {
       setData('name', variable?.name || '');
       setData('type', variable?.type || '');
-      setLocalOptions(variable?.options && variable.options.length > 0 ? variable.options : ['']);
-      setData('options', variable?.options && variable.options.length > 0 ? variable.options : ['']);
+      const opts = extractOptions(variable?.options);
+      setLocalOptions(opts.length > 0 ? opts : ['']);
+      setData('options', opts);
     } else {
       reset();
       setLocalOptions(['']);
@@ -48,7 +74,6 @@ export default function VariableModal({ isOpen, onClose, onSuccess, studyId, var
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    console.log(data.type);
     const validTypes = ['text', 'number', 'date', 'boolean', 'select'];
     if (!validTypes.includes(data.type)) {
       alert('Selecione um tipo válido para a variável.');
@@ -178,4 +203,6 @@ export default function VariableModal({ isOpen, onClose, onSuccess, studyId, var
       </DialogContent>
     </Dialog>
   );
-}
+};
+// If you want default export, uncomment below:
+// export default VariableModal;

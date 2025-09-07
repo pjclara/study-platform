@@ -10,6 +10,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('studies/{study}/variables/{variable}/edit', [\App\Http\Controllers\StudyController::class, 'editVariable'])->name('studies.variables.edit');
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
