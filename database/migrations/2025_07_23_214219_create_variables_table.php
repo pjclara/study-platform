@@ -15,7 +15,8 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('study_id')->constrained('studies')->onDelete('cascade');
             $table->string('name');
-            $table->enum('type', ['text', 'number', 'date', 'boolean'])->default('text');
+            $table->enum('type', ['text', 'number', 'date', 'boolean', 'select'])->default('text');
+            $table->json('options')->nullable(); // opções para o tipo select
             $table->boolean('required')->default(false);
             $table->string('unit')->nullable(); // e.g., kg, cm, etc.
             $table->string('group')->nullable(); // e.g., demographic, clinical

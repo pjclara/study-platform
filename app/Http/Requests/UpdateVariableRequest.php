@@ -32,6 +32,8 @@ class UpdateVariableRequest extends FormRequest
             'updated_by' => 'nullable|integer',
             'deleted_by' => 'nullable|integer',
             'required' => 'boolean', // Assuming this is a boolean field indicating if the variable is required
+            'options' => 'nullable|array', // opções para o tipo select
+            'options.*' => 'string',
         ];
     }
 }

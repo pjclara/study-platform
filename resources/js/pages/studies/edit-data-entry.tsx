@@ -6,13 +6,14 @@ interface Variable {
     id: number;
     name: string;
     type?: string; // Adicionando tipo opcional
+    options?: string[]; // Adicionando opções opcionais
 }
 interface StudyEntry {
     id: number;
     values: Record<number, string>;
     created_at: string;
 }
-interface EditEntryProps {
+interface EditEntryProps extends Record<string, any> {
     studyId: number;
     entry: StudyEntry;
     variables: Variable[];
@@ -23,13 +24,15 @@ export default function EditEntry() {
     const { data, setData, put, processing, errors } = useForm({ ...entry.values });
 
     function handleChange(variableId: number, value: string) {
-        setData(variableId.toString(), value);
+        setData(variableId, value);
     }
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         put(`/studies/${studyId}/data-entry/${entry.id}`);
     }
+
+    console.log(variables);
 
     return (
         <AppLayout>
@@ -39,7 +42,19 @@ export default function EditEntry() {
                 {variables.map((v) => (
                     <div key={v.id} className="mb-4">
                         <label className="block mb-1 font-semibold">{v.name}</label>
-                        {v.type === 'boolean' ? (
+                        {v.type === 'select' && v.options ? (
+                            <select
+                                className="select select-bordered w-full"
+                                value={data[v.id] || ''}
+                                onChange={e => handleChange(v.id, e.target.value)}
+                                disabled={processing}
+                            >
+                                <option value="">Selecione...</option>
+                                {v.options.map((opt, i) => (
+                                    <option key={i} value={opt}>{opt}</option>
+                                ))}
+                            </select>
+                        ) : v.type === 'boolean' ? (
                             <input
                                 type="checkbox"
                                 className="form-checkbox h-5 w-5 text-blue-600"

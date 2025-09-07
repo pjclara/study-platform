@@ -23,10 +23,12 @@ class Variable extends Model
         'updated_by',
         'deleted_by',
         'required', // Assuming this is a boolean field indicating if the variable is required
+        'options', // opções para o tipo select
     ];
 
     protected $casts = [
         'required' => 'boolean',
+        'options' => 'array',
     ];
 
     public function study()

@@ -120,7 +120,7 @@ class StudyController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:text,number,date,boolean',
+            'type' => 'required|in:text,number,date,boolean,select',
         ]);
         // add created_by 
         $validated['created_by'] = auth()->id();
@@ -135,7 +135,12 @@ class StudyController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:text,number,date,boolean',
+            'type' => 'required|in:text,number,date,boolean,select',
+            'unit' => 'nullable|string|max:50',
+            'group' => 'nullable|string|max:50',
+            'order_index' => 'nullable|integer',
+            'required' => 'boolean', // Assuming this is a boolean field indicating if the variable
+            'options' => 'nullable|array', // opções para o tipo select
         ]);
         $variable->update($validated);
         return redirect()->back()->with('success', 'Variable updated successfully.');
@@ -160,7 +165,7 @@ class StudyController extends Controller
 
         // Todas as variáveis do estudo
         $variables = Variable::where('study_id', $studyId)
-            ->select('id', 'name')
+            ->select('id', 'name', 'type','options')
             ->get();
 
 
@@ -229,7 +234,7 @@ class StudyController extends Controller
                 'values' => $values,
                 'created_at' => $studyEntry->created_at,
             ],
-            'variables' => $study->variables->map(fn($v) => ['id' => $v->id, 'name' => $v->name, 'type' => $v->type]),
+            'variables' => $study->variables->map(fn($v) => ['id' => $v->id, 'name' => $v->name, 'type' => $v->type, 'options' => $v->options]),
         ]);
     }
 
@@ -262,7 +267,7 @@ class StudyController extends Controller
     public function dataEntryForm(Study $study)
     {
 
-        $variables = $study->variables()->select('id', 'name', 'type')->get();
+        $variables = $study->variables()->select('id', 'name', 'type', 'options')->get();
         return inertia('studies/data-entry-form', [
             'studyId' => $study->id,
             'variables' => $variables,

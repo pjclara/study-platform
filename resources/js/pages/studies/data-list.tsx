@@ -6,6 +6,8 @@ import { router } from '@inertiajs/core';
 type Variable = {
     id: number;
     name: string;
+    type?: string;
+    options?: string[];
 };
 
 type StudyEntry = {
@@ -20,6 +22,7 @@ type StudyDataListProps = {
     variables: Variable[];
 };
 
+
 const handleDelete = (e: React.FormEvent, id: number, studyId:number) => {
     e.preventDefault();
     if (confirm('Tem certeza que deseja excluir esta entrada?')) {
@@ -32,6 +35,7 @@ export default function StudyDataList() {
 
     const safeEntries = Array.isArray(studyEntries) ? studyEntries : [];
     const safeVariables = Array.isArray(variables) ? variables : [];
+console.log(variables);
 
     return (
         <AppLayout>
@@ -57,6 +61,11 @@ export default function StudyDataList() {
                                 {safeVariables.map((v) => (
                                     <th key={v.id} className="border px-4 py-2 text-left">
                                         {v.name}
+                                        {v.type === 'select' && v.options && v.options.length > 0 && (
+                                            <div className="text-xs text-gray-300 font-normal mt-1">
+                                                Opções: {v.options.join(', ')}
+                                            </div>
+                                        )}
                                     </th>
                                 ))}
                                 <th className="border px-4 py-2 text-left">Inserido em</th>

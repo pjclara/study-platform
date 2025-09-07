@@ -6,6 +6,7 @@ type Variable = {
     id: number;
     name: string;
     type: string;
+    options?: string[]; // novas opções vindas do backend
 };
 
 type PageProps = {
@@ -29,31 +30,84 @@ export default function DataEntryForm() {
             onSuccess: () => reset(),
         });
     }
-
     return (
         <AppLayout>
-            <Head title="Add Data Entry" />
-            <h1 className="mb-4 text-2xl font-bold">Add Data Entry</h1>
+            <Head title="Adicionar Entrada de Dados" />
+            <h1 className="mb-4 text-2xl font-bold">Adicionar Entrada de Dados</h1>
             <Link href={`/studies/${studyId}/data-list`} className="btn btn-secondary mb-4">
-                Back to Data List
+                Voltar para Lista de Dados
             </Link>
-            <form onSubmit={handleSubmit} className="mx-auto max-w-lg space-y-5 rounded-xl bg-white p-6 shadow-md">
-                
 
+            <form onSubmit={handleSubmit} className="mx-auto max-w-lg space-y-5 rounded-xl bg-white p-6 shadow-md">
                 {variables.map((v) => (
                     <div key={v.id}>
                         <label className="mb-1 block font-medium text-gray-700">{v.name}</label>
-                        <input
-                            type={v.type}
-                            value={data.values[v.id] || ''}
-                            onChange={(e) => handleValueChange(v.id, e.target.value)}
-                            className="input input-bordered w-full"
-                        />
+                        {(() => {
+                            if (v.type === 'select' && v.options) {
+                                return (
+                                    <select
+                                        value={data.values[v.id] || ''}
+                                        onChange={e => handleValueChange(v.id, e.target.value)}
+                                        className="select select-bordered w-full"
+                                    >
+                                        <option value="">Selecione...</option>
+                                        {v.options.map((opt, i) => (
+                                            <option key={i} value={opt}>{opt}</option>
+                                        ))}
+                                    </select>
+                                );
+                            }
+                            if (v.type === 'boolean') {
+                                return (
+                                    <select
+                                        value={data.values[v.id] || ''}
+                                        onChange={e => handleValueChange(v.id, e.target.value)}
+                                        className="select select-bordered w-full"
+                                    >
+                                        <option value="">Selecione...</option>
+                                        <option value="true">Sim</option>
+                                        <option value="false">Não</option>
+                                    </select>
+                                );
+                            }
+                            if (v.type === 'number') {
+                                return (
+                                    <input
+                                        type="number"
+                                        value={data.values[v.id] || ''}
+                                        onChange={e => handleValueChange(v.id, e.target.value)}
+                                        className="input input-bordered w-full"
+                                    />
+                                );
+                            }
+                            if (v.type === 'date') {
+                                return (
+                                    <input
+                                        type="date"
+                                        value={data.values[v.id] || ''}
+                                        onChange={e => handleValueChange(v.id, e.target.value)}
+                                        className="input input-bordered w-full"
+                                    />
+                                );
+                            }
+                            // fallback para texto
+                            return (
+                                <input
+                                    type="text"
+                                    value={data.values[v.id] || ''}
+                                    onChange={e => handleValueChange(v.id, e.target.value)}
+                                    className="input input-bordered w-full"
+                                />
+                            );
+                        })()}
+                        {(errors as Record<string, string>)[`values.${v.id}`] && (
+                            <div className="text-sm text-red-500">{(errors as Record<string, string>)[`values.${v.id}`]}</div>
+                        )}
                     </div>
                 ))}
 
                 <div className="flex justify-end">
-                    <button type="submit" className="text-sm bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded" disabled={processing}>
+                    <button type="submit" className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600" disabled={processing}>
                         Adicionar Entrada
                     </button>
                 </div>
