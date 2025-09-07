@@ -62,7 +62,7 @@ export default function DataEntryModal({ isOpen, onClose, studyId, variables, in
     }
 
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+        <Dialog open={isOpen}>
             <DialogContent className="max-w-lg rounded-2xl shadow-xl">
                 <DialogHeader className="space-y-1">
                     <DialogTitle className="text-xl font-semibold text-gray-900">{isEdit ? 'Editar Entrada' : 'Adicionar Entrada'}</DialogTitle>
